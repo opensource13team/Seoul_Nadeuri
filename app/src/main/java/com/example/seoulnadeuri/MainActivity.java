@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment;
 // 뷰 바인딩 클래스 import (이름이 안 맞아서 빨간 줄이 뜨면 Alt+Enter 눌러주세요)
 import com.example.seoulnadeuri.databinding.ActivityMainBinding;
 
+
 public class MainActivity extends AppCompatActivity {
 
     // 뷰 바인딩 객체 선언 (과거의 findViewById 노가다를 없애주는 최신 무기)
