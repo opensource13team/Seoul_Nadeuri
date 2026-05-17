@@ -131,7 +131,17 @@ export default {
     const headers = {
       "Content-Type": "application/json;charset=UTF-8",
       "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
     };
+
+    if (request.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers });
+    }
+
+    if (url.pathname === "/health") {
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
+    }
 
     if (url.pathname === "/api/all-places") {
       // KV 저장소(SEOUL_CACHE)에서 스케줄러가 미리 모아둔 121곳 데이터를 즉시 꺼내옴
