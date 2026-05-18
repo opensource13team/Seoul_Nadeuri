@@ -122,7 +122,6 @@ const PLACE_LIST = [
   "숭례문"
 ];
 
-
 export default {
   // 1. 안드로이드 요청 처리
   async fetch(request, env, ctx) {
@@ -175,8 +174,11 @@ export default {
           
           const events = cityData.EVENT_STTS || [];
           const eventValue = events.length > 0 ? 1.0 : 0.0;
-          const eventName = events.length > 0 ? (events[0].EVENT_NM || "") : "";
-
+          const eventName = events
+            .map(e => e.EVENT_NM)          
+            .filter(name => name)           
+            .join(", ");
+          
           return {
             placeName: place,
             temp: parseFloat(weather.TEMP || 0),
