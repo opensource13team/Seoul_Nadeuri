@@ -123,44 +123,43 @@ const PLACE_LIST = [
 ];
 
 export default {
-  // 📥 1. 안드로이드 앱에서 실시간 데이터를 요청할 때 호출되는 API (GET /api/all-places)
+  // 1. 안드로이드 요청 처리
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    
-    // 안드로이드 통신 시 에러 방지 및 한글 깨짐 방지를 위한 헤더 설정
     const headers = {
       "Content-Type": "application/json;charset=UTF-8",
       "Access-Control-Allow-Origin": "*",
     };
 
     if (url.pathname === "/api/all-places") {
-      // KV 저장소(SEOUL_CACHE)에서 스케줄러가 미리 모아둔 121곳 데이터를 즉시 꺼내옴
       const cachedDataStr = await env.SEOUL_CACHE.get("all_places_data");
-      
       if (!cachedDataStr) {
-        return new Response(
-          JSON.stringify({ error: "서버에서 데이터를 수집 중입니다. 잠시 후 다시 시도해주세요." }), 
-          { status: 503, headers }
-        );
+        return new Response(JSON.stringify({ error: "데이터 수집 중입니다." }), { status: 503, headers });
       }
-
       return new Response(cachedDataStr, { status: 200, headers });
     }
-
-    return new Response("Seoul Outing Proxy is Running successfully!", { status: 200 });
+    return new Response("Seoul Outing Proxy is Running!", { status: 200 });
   },
 
-  // 🔄 2. 10분마다 자동으로 서울시 서버를 찌르는 백그라운드 스케줄러 (Cron Trigger)
+  // 2. 순환 동기화 스케줄러 (무료 50회 제한 회피)
   async scheduled(event, env, ctx) {
-    console.log("🔄 스케줄러 구동: 서울시 실시간 데이터 121곳 전체 갱신 시작");
     const apiKey = env.SEOUL_API_KEY;
-    const results = [];
 
-    // 서울시 API 서버 과부하 및 IP 차단을 막기 위해 10개씩 묶어서(Chunk) 안전하게 호출
-    const chunkSize = 10;
-    for (let i = 0; i < PLACE_LIST.length; i += chunkSize) {
-      const chunk = PLACE_LIST.slice(i, i + chunkSize);
-      
+    // 현재 실행할 그룹 번호 가져오기 (0, 1, 2)
+    let currentGroup = parseInt(await env.SEOUL_CACHE.get("sync_group") || "0");
+
+    // 121곳을 45곳씩 자르기 (50회 제한 아래로)
+    const chunkSize = 45;
+    const startIndex = currentGroup * chunkSize;
+    const endIndex = startIndex + chunkSize;
+    const targetPlaces = PLACE_LIST.slice(startIndex, endIndex);
+
+    if (targetPlaces.length === 0) return;
+
+    // 45곳 데이터 실시간 조회 (안정성을 위해 10개씩 묶어서)
+    const results = [];
+    for (let i = 0; i < targetPlaces.length; i += 10) {
+      const chunk = targetPlaces.slice(i, i + 10);
       const fetchPromises = chunk.map(async (place) => {
         const apiUrl = `http://openapi.seoul.go.kr:8088/${apiKey}/json/citydata/1/5/${encodeURIComponent(place)}`;
         try {
@@ -173,11 +172,8 @@ export default {
           const weather = cityData.WEATHER_STTS?.[0] || {};
           const livePpltn = cityData.LIVE_PPLTN_STTS?.[0] || {};
           
-          // 🚩 실시간 이벤트 정보 추출
           const events = cityData.EVENT_STTS || [];
-          // AI 모델에 들어갈 실수형 피처 (축제가 있으면 1.0, 없으면 0.0)
           const eventValue = events.length > 0 ? 1.0 : 0.0;
-          // UI 화면 카드뷰에 띄워줄 대표 축제 이름 (없으면 빈 문자열)
           const eventName = events.length > 0 ? (events[0].EVENT_NM || "") : "";
 
           return {
@@ -185,29 +181,38 @@ export default {
             temp: parseFloat(weather.TEMP || 0),
             pmIndex: parseFloat(weather.PM10 || 0),
             congestion: livePpltn.AREA_CONGEST_LVL || "보통",
-            localEvent: eventValue,  // AI 입력용 (float)
-            eventName: eventName     // ⬅️ 안드로이드 UI 출력용 (String)
+            localEvent: eventValue,  
+            eventName: eventName     
           };
         } catch (err) {
-          console.error(`[${place}] 데이터 조회 실패:`, err);
           return null;
         }
       });
 
-      // 10개 병렬 처리 대기
       const chunkResults = await Promise.all(fetchPromises);
-      chunkResults.forEach((item) => {
-        if (item) results.push(item);
-      });
-
-      // 청크 사이에 0.5초(500ms) 휴식을 주어 통신 안정성 극대화
+      chunkResults.forEach(item => { if (item) results.push(item); });
       await new Promise(resolve => setTimeout(resolve, 500));
     }
 
-    // 수집 성공한 배열을 JSON 문자열로 변환하여 KV에 최종 저장
-    if (results.length > 0) {
-      await env.SEOUL_CACHE.put("all_places_data", JSON.stringify(results));
-      console.log(`✅ 데이터 적재 완료! 총 ${results.length}곳 최신화 성공.`);
+    // KV에 저장된 전체 데이터(121곳) 불러오기
+    let existingData = [];
+    const cachedStr = await env.SEOUL_CACHE.get("all_places_data");
+    if (cachedStr) {
+      existingData = JSON.parse(cachedStr);
     }
+
+    // 기존 데이터에서 '이번에 새로 가져온 장소'들만 최신 데이터로 덮어쓰기
+    let updatedData = existingData.filter(oldItem => !targetPlaces.includes(oldItem.placeName));
+    updatedData.push(...results);
+
+    // 최종 병합된 데이터(최대 121곳) 다시 저장
+    await env.SEOUL_CACHE.put("all_places_data", JSON.stringify(updatedData));
+
+    // 다음 그룹 번호 지정 (0 -> 1 -> 2 -> 0 무한 반복)
+    let nextGroup = currentGroup + 1;
+    if (nextGroup * chunkSize >= PLACE_LIST.length) {
+      nextGroup = 0; // 끝까지 돌았으면 처음으로 리셋
+    }
+    await env.SEOUL_CACHE.put("sync_group", nextGroup.toString());
   }
 };
