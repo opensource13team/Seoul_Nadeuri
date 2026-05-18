@@ -122,6 +122,7 @@ const PLACE_LIST = [
   "숭례문"
 ];
 
+
 export default {
   // 1. 안드로이드 요청 처리
   async fetch(request, env, ctx) {
