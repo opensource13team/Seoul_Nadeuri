@@ -1,5 +1,6 @@
 package com.example.seoulnadeuri;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
@@ -30,6 +31,24 @@ public class HotPlaceAdapter extends RecyclerView.Adapter<HotPlaceAdapter.ViewHo
         HotPlace item = hotPlaceList.get(position);
         holder.binding.tvPlaceName.setText(item.getPlaceName());
         holder.binding.tvCongestion.setText(item.getCongestion());
+        holder.binding.tvCongestion.setTextColor(getCongestionColor(item.getCongestion()));
+    }
+
+    // 혼잡도 텍스트에 맞는 색상 반환
+    private int getCongestionColor(String congestion) {
+        if (congestion == null) {
+            return Color.parseColor("#757575");
+        }
+
+        if (congestion.contains("여유")) {
+            return Color.parseColor("#2E7D32");
+        } else if (congestion.contains("보통")) {
+            return Color.parseColor("#F9A825");
+        } else if (congestion.contains("붐빔")) {
+            return Color.parseColor("#C62828");
+        }
+
+        return Color.parseColor("#757575");
     }
 
     // 3. 총 몇 개인지 알려주는 곳
