@@ -126,19 +126,32 @@ export default {
   // 1. 안드로이드 요청 처리
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    // 안드로이드 통신 시 에러 방지 및 한글 깨짐 방지를 위한 헤더 설정
     const headers = {
       "Content-Type": "application/json;charset=UTF-8",
       "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
     };
 
+    if (request.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers });
+    }
+
+    if (url.pathname === "/health") {
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
+    }
+
     if (url.pathname === "/api/all-places") {
+      // KV 저장소(SEOUL_CACHE)에서 스케줄러가 미리 모아둔 121곳 데이터를 즉시 꺼내옴
       const cachedDataStr = await env.SEOUL_CACHE.get("all_places_data");
       if (!cachedDataStr) {
         return new Response(JSON.stringify({ error: "데이터 수집 중입니다." }), { status: 503, headers });
       }
       return new Response(cachedDataStr, { status: 200, headers });
     }
-    return new Response("Seoul Outing Proxy is Running!", { status: 200 });
+
+    return new Response("Seoul Outing Proxy is Running!", { status: 200, headers });
   },
 
   // 2. 순환 동기화 스케줄러 (무료 50회 제한 회피)
