@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.bumptech.glide.Glide;
 import com.example.seoulnadeuri.databinding.ActivityDetailBinding;
 import com.google.gson.Gson;
 
@@ -41,6 +43,15 @@ public class DetailActivity extends AppCompatActivity {
 
         // 노란 박스에 띄우기
         binding.tvDetailEventList.setText(formattedEvent.trim());
+
+        // ==========================================
+        String dummyImageUrl = "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?q=80&w=800&auto=format&fit=crop";
+
+        Glide.with(this)
+                .load(dummyImageUrl) // 띄울 이미지 인터넷 주소
+                .centerCrop()        // 이미지 비율 안 깨지게 화면(ImageView)에 꽉 채우기
+                .into(binding.ivDetailPhoto); // activity_detail.xml에 만들어둔 사진 칸에 쏘기
+        // ==========================================
 
         // 3. 찜(북마크) 기능 세팅
         prefs = getSharedPreferences("SeoulWishlist", MODE_PRIVATE);
