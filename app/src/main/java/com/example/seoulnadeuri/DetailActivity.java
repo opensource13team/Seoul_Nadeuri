@@ -36,16 +36,10 @@ public class DetailActivity extends AppCompatActivity {
         binding.tvDetailCongestion.setText(congestion);
         binding.tvDetailWeather.setText(weatherInfo);
 
-        // 👇 요기가 핵심! (콤마와 대괄호를 기준으로 줄바꿈 처리)
-        String formattedEvent = eventDetail
-                .replace(", ", "\n")    // 콤마 뒤에 띄어쓰기가 있는 경우 줄바꿈
-                .replace(",", "\n")     // 콤마만 있는 경우 줄바꿈
-                .replace(" [", "\n[")   // 띄어쓰기 후 대괄호 시작 시 줄바꿈
-                .replace("[", "\n[")    // 대괄호만 시작 시 줄바꿈
-                .replace("\n\n", "\n")  // 혹시 엔터가 두 번 연속 들어갔다면 하나로 압축
-                .replace("🎪 \n", "🎪 "); // 서커스 텐트 아이콘 바로 뒤에 줄바꿈되는 것 방지
+        // 👇 쉼표+띄어쓰기(", ") 기준으로만 깔끔하게 줄바꿈 처리!
+        String formattedEvent = eventDetail.replace(", ", "\n");
 
-        // 예쁘게 다듬어진 텍스트를 노란 박스에 띄우기
+        // 노란 박스에 띄우기
         binding.tvDetailEventList.setText(formattedEvent.trim());
 
         // 3. 찜(북마크) 기능 세팅
