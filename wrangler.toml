@@ -1,0 +1,11 @@
+name = "seoul-nadeuri-backend"
+main = "worker.js"
+compatibility_date = "2026-05-16"
+
+[triggers]
+crons = ["*/10 * * * *"]
+
+[[kv_namespaces]]
+binding = "SEOUL_CACHE"
+id = "df9ce0d088bb40ed9744f667e97efb14"
+preview_id = "58c2f6bf483c4dc0ba532c08718ae528"

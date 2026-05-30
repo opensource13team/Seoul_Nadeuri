@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+.dev.vars
+.wrangler/
+node_modules/
+npm-debug.log*
