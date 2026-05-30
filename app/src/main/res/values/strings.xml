@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">SeoulNadeuri</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="record_empty_message">아직 기록이 없어요.\n추천 장소를 둘러보고 나들이 기록을 채워보세요.</string>
 </resources>
