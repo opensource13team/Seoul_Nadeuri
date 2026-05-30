@@ -12,6 +12,7 @@ public class SeoulPlaceData {
 
     // 워커에서 안 주는 값 임시 처리용
     public float rain = 0.0f;
+    public float indoorTag = 0.5f;
 
     // 기온 정규화 (-20~40도 기준)
     public float getNormalizedTemp() {
@@ -43,8 +44,4 @@ public class SeoulPlaceData {
             default: return 0.5f;
         }
     }
-
-    // 실내외 태그 및 20대 비율 (현재 워커에 없으므로 기본값 처리)
-    public float getIndoorTag() { return 0.0f; }
-    public float getTarget20sRatio() { return 0.5f; }
 }

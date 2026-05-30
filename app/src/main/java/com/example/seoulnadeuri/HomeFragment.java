@@ -86,8 +86,44 @@ public class HomeFragment extends Fragment {
         // UI 띄우기용 객체(HotPlace)로 변환
         for (PlaceScore scoreData : top10Scores) {
             SeoulPlaceData originData = scoreData.getOriginData();
-            // 장소 이름과 혼잡도 텍스트를 넘겨줌 (예: "뚝섬 한강공원", "여유")
-            resultList.add(new HotPlace(originData.placeName, originData.congestion));
+
+            // 1. 미세먼지(pmIndex) 수치를 한국 기준 글자로 변환
+            String pmText = "좋음";
+            if (originData.pmIndex > 150) pmText = "매우 나쁨";
+            else if (originData.pmIndex > 80) pmText = "나쁨";
+            else if (originData.pmIndex > 30) pmText = "보통";
+
+            // 2. 날씨 정보 한 줄로 묶기
+            String weatherStr = String.format("🌡 %.1f℃ | 😷 미세먼지: %s | ☔ 강수량: %.1fmm",
+                    originData.temp, pmText, originData.rain);
+
+            // 3. 실내외 태그를 글자로 변환 (JSON 메타데이터 기준)
+            float indoorValue = originData.indoorTag;
+            String indoorText = "야외";
+            if (indoorValue >= 1.0f) indoorText = "실내";
+            else if (indoorValue == 0.5f) indoorText = "실내외 복합";
+
+            // 4. 축제 여부 확인
+            String eventText = (originData.localEvent >= 1.0f)
+                    ? "🎪 축제: 개최중"
+                    : "🎪 축제: 없음";
+
+            // 5. 장소 정보 한 줄로 묶기 (메인 화면용: 짧게)
+            String placeInfoStr = eventText + " | " + indoorText;
+
+            // 6. 진짜 축제 이름 뽑아두기 (상세 화면용: 길게)
+            String realEventName = (originData.localEvent >= 1.0f && originData.eventName != null && !originData.eventName.isEmpty())
+                    ? "🎪 " + originData.eventName
+                    : "현재 진행중인 축제/행사가 없습니다.";
+
+            // 최종 리스트에 담기 (realEventName 추가!)
+            resultList.add(new HotPlace(
+                    originData.placeName,
+                    originData.congestion,
+                    weatherStr,
+                    placeInfoStr,
+                    realEventName
+            ));
         }
 
         return resultList;

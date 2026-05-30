@@ -9,14 +9,12 @@ import java.util.List;
 
 public class HotPlaceAdapter extends RecyclerView.Adapter<HotPlaceAdapter.ViewHolder> {
 
-    private List<HotPlace> hotPlaceList; // 띄워줄 데이터 목록
+    private List<HotPlace> hotPlaceList;
 
-    // 공장장에게 리스트 데이터를 전달받음
     public HotPlaceAdapter(List<HotPlace> hotPlaceList) {
         this.hotPlaceList = hotPlaceList;
     }
 
-    // 1. 붕어빵 틀(XML)을 가져와서 찍어내는 곳
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -24,24 +22,37 @@ public class HotPlaceAdapter extends RecyclerView.Adapter<HotPlaceAdapter.ViewHo
         return new ViewHolder(binding);
     }
 
-    // 2. 찍어낸 붕어빵에 팥(데이터)을 넣어주는 곳
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         HotPlace item = hotPlaceList.get(position);
         holder.binding.tvPlaceName.setText(item.getPlaceName());
         holder.binding.tvCongestion.setText(item.getCongestion());
+        holder.binding.tvWeatherInfo.setText(item.getWeatherInfo());
+        holder.binding.tvPlaceInfo.setText(item.getPlaceInfo());
+
+        // 👇 요기 추가! (리스트의 한 칸을 클릭했을 때 작동하는 이벤트)
+        holder.itemView.setOnClickListener(v -> {
+            android.content.Context context = v.getContext();
+            android.content.Intent intent = new android.content.Intent(context, DetailActivity.class);
+
+            // 택배 상자에 데이터 욱여넣기
+            intent.putExtra("PLACE_NAME", item.getPlaceName());
+            intent.putExtra("CONGESTION", item.getCongestion());
+            intent.putExtra("WEATHER_INFO", item.getWeatherInfo());
+            intent.putExtra("PLACE_INFO", item.getPlaceInfo());
+            intent.putExtra("EVENT_DETAIL", item.getEventDetail());
+
+            context.startActivity(intent); // 상세 페이지로 화면 전환!
+        });
     }
 
-    // 3. 총 몇 개인지 알려주는 곳
     @Override
     public int getItemCount() {
         return hotPlaceList.size();
     }
 
-    // 화면에 보여줄 뷰(텍스트뷰 등)를 꽉 쥐고 있는 녀석
     static class ViewHolder extends RecyclerView.ViewHolder {
         ItemHotplaceBinding binding;
-
         public ViewHolder(ItemHotplaceBinding binding) {
             super(binding.getRoot());
             this.binding = binding;

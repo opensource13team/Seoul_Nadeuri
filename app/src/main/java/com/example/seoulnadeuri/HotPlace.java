@@ -1,21 +1,23 @@
 package com.example.seoulnadeuri;
 
 public class HotPlace {
-    private String placeName;   // 장소 이름
-    private String congestion;  // 혼잡도 (여유, 붐빔 등)
+    private String placeName;
+    private String congestion;
+    private String weatherInfo;
+    private String placeInfo;
+    private String eventDetail;
 
-    // 생성자 (데이터를 처음 넣을 때 사용)
-    public HotPlace(String placeName, String congestion) {
+    public HotPlace(String placeName, String congestion, String weatherInfo, String placeInfo, String eventDetail) {
         this.placeName = placeName;
         this.congestion = congestion;
+        this.weatherInfo = weatherInfo;
+        this.placeInfo = placeInfo;
+        this.eventDetail = eventDetail;
     }
 
-    // 데이터를 꺼내볼 때 사용하는 함수들(Getter)
-    public String getPlaceName() {
-        return placeName;
-    }
-
-    public String getCongestion() {
-        return congestion;
-    }
+    public String getPlaceName() { return placeName; }
+    public String getCongestion() { return congestion; }
+    public String getWeatherInfo() { return weatherInfo; }
+    public String getPlaceInfo() { return placeInfo; }
+    public String getEventDetail() { return eventDetail; } // Getter 추가
 }
