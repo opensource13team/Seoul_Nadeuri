@@ -15,6 +15,11 @@ public class HotPlaceAdapter extends RecyclerView.Adapter<HotPlaceAdapter.ViewHo
         this.hotPlaceList = hotPlaceList;
     }
 
+    public void updateList(List<HotPlace> newList) {
+        this.hotPlaceList = newList;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
