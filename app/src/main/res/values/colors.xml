@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- 기본 배경색 -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <!-- 🌿 메인 포인트 연두색 -->
+    <color name="point_green">#8BC34A</color>
+    <color name="point_green_dark">#689F38</color>
+
+    <!-- 옅은 연두색 (박스 배경용 - 기존의 칙칙한 회색을 대체) -->
+    <color name="bg_light_green">#F1F8E9</color>
+
+    <!-- 텍스트 색상 -->
+    <color name="text_dark">#333333</color>
+    <color name="text_gray">#888888</color>
 </resources>

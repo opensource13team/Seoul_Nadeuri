@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 모서리를 24dp만큼 둥글게 깎아줍니다 -->
+    <corners android:radius="24dp" />
+    <!-- 기본 배경색 (연두색) -->
+    <solid android:color="@color/bg_light_green" />
+</shape>

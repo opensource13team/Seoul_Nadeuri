@@ -1,6 +1,9 @@
 package com.example.seoulnadeuri;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,112 +24,164 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
-    private RecommendationEngine aiEngine; // TFLite 모델 엔진
+
+    // 오토 롤링 배너 타이머 장치
+    private Handler sliderHandler = new Handler(Looper.getMainLooper());
+    private Runnable sliderRunnable;
+
+    // AI 추천 엔진
+    private RecommendationEngine aiEngine;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
 
-        // 리사이클러뷰 기본 세팅
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        // 1. AI 엔진 초기화 (seoul_outing.tflite 파일 로드)
+        // AI 엔진 초기화
         aiEngine = new RecommendationEngine(getContext());
 
-        // 2. 클라우드플레어 워커 API 호출 시작
-        fetchSeoulDataAndRunAI();
+        // 1. 헤더: 돋보기 버튼 누르면 '검색' 탭으로 이동 (XML에서 btn_top_search로 수정했으므로 정상 작동!)
+        binding.btnTopSearch.setOnClickListener(v -> {
+            // 하단 탭을 조작하는 대신, 프래그먼트를 직접 검색 화면(RecordFragment)으로 교체
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new RecordFragment()) // MainActivity의 프레임레이아웃 ID
+                    .addToBackStack(null) // 휴대폰 뒤로가기 버튼 누르면 다시 홈으로 돌아오게 설정
+                    .commit();
+        });
+
+        // 2. 오토 롤링 배너 세팅
+        setupHeroCarousel();
+
+        // 3. 퀵 필터 버튼 이벤트 세팅
+        setupQuickFilters();
+
+        // 4. 가로 스크롤 AI 맞춤 추천 리스트 세팅
+        setupAiRecommend();
 
         return binding.getRoot();
     }
 
-    private void fetchSeoulDataAndRunAI() {
-        // Retrofit 통신 준비
+    private void setupHeroCarousel() {
+        List<BannerAdapter.BannerItem> bannerItems = new ArrayList<>();
+
+        // 👇 인터넷 주소 대신 유저님이 만드신 assets 폴더의 로컬 경로를 사용합니다!
+        bannerItems.add(new BannerAdapter.BannerItem("이번 주말, 한강 피크닉 어때요?", "file:///android_asset/place_images/반포한강공원.jpg"));
+        bannerItems.add(new BannerAdapter.BannerItem("도심 속 야경 명소 Top 5", "file:///android_asset/place_images/잠실롯데타워·석촌호수.jpg"));
+        bannerItems.add(new BannerAdapter.BannerItem("비 오는 날엔 실내 데이트 ☔", "file:///android_asset/place_images/DDP(동대문디자인플라자).jpg"));
+
+        BannerAdapter adapter = new BannerAdapter(bannerItems);
+        binding.vpHeroBanner.setAdapter(adapter);
+
+        sliderRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (binding == null) return;
+                int nextItem = binding.vpHeroBanner.getCurrentItem() + 1;
+                if (nextItem >= adapter.getItemCount()) nextItem = 0;
+                binding.vpHeroBanner.setCurrentItem(nextItem, true);
+                sliderHandler.postDelayed(this, 3000);
+            }
+        };
+    }
+
+    private void setupQuickFilters() {
+        binding.btnFilterIndoor.setOnClickListener(v -> Toast.makeText(getContext(), "실내 핫플 필터 준비중입니다!", Toast.LENGTH_SHORT).show());
+        binding.btnFilterOutdoor.setOnClickListener(v -> Toast.makeText(getContext(), "야외 핫플 필터 준비중입니다!", Toast.LENGTH_SHORT).show());
+        binding.btnFilterRelaxed.setOnClickListener(v -> Toast.makeText(getContext(), "쾌적한 장소 필터 준비중입니다!", Toast.LENGTH_SHORT).show());
+        binding.btnFilterFestival.setOnClickListener(v -> Toast.makeText(getContext(), "축제 정보 필터 준비중입니다!", Toast.LENGTH_SHORT).show());
+
+        // 👇 찜한 장소 버튼 누르면 찜 목록 화면으로 이동!
+        binding.btnFilterWishlist.setOnClickListener(v -> {
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new WishlistFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+    }
+
+    private void setupAiRecommend() {
+        binding.rvAiRecommend.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // 서버에서 실시간 데이터 가져오기
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://seoul-outing-proxy.comfy202.workers.dev/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         SeoulApiService apiService = retrofit.create(SeoulApiService.class);
-
-        // API 비동기 호출
         apiService.getAllPlaces().enqueue(new Callback<List<SeoulPlaceData>>() {
             @Override
             public void onResponse(Call<List<SeoulPlaceData>> call, Response<List<SeoulPlaceData>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<SeoulPlaceData> all121Places = response.body();
+                    List<SeoulPlaceData> apiDataList = response.body();
 
-                    // TODO: 현재 유저의 취향 점수를 가져옵니다. (0.0 ~ 1.0)
-                    // 일단 테스트용으로 0.8(상당히 핫플을 좋아함)로 고정
-                    float userPref = 0.8f;
+                    // 유저 취향(임시 0.8)을 넣고 AI 엔진 돌리기
+                    List<HotPlace> resultList = runInference(apiDataList, 0.8f);
 
-                    // 3. AI 모델에 121개 데이터를 넣고 Top 10 뽑아내기
-                    List<HotPlace> top10List = runInference(all121Places, userPref);
-
-                    // 4. 어댑터에 Top 10 데이터 전달 후 화면 새로고침
-                    HotPlaceAdapter adapter = new HotPlaceAdapter(top10List);
-                    binding.recyclerView.setAdapter(adapter);
+                    // 완성된 리스트를 어댑터에 꽂아서 화면에 띄우기
+                    binding.rvAiRecommend.setAdapter(new HotPlaceAdapter(resultList));
                 }
             }
 
             @Override
             public void onFailure(Call<List<SeoulPlaceData>> call, Throwable t) {
-                Toast.makeText(getContext(), "데이터를 불러오지 못했습니다: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("API_ERROR", "데이터 로드 실패: " + t.getMessage());
+                Toast.makeText(getContext(), "실시간 데이터를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // AI 엔진을 돌려서 어댑터에 들어갈 형태로 변환하는 함수
+    // AI 엔진 점수대로 10개를 뽑고, UI에 띄울 텍스트로 가공하는 함수
     private List<HotPlace> runInference(List<SeoulPlaceData> apiDataList, float userPref) {
         List<HotPlace> resultList = new ArrayList<>();
-
-        // 엔진에서 점수가 높은 순으로 10개를 받아옴
         List<PlaceScore> top10Scores = aiEngine.getTop10Places(apiDataList, userPref);
 
-        // UI 띄우기용 객체(HotPlace)로 변환
         for (PlaceScore scoreData : top10Scores) {
             SeoulPlaceData originData = scoreData.getOriginData();
 
-            // 1. 미세먼지(pmIndex) 수치를 한국 기준 글자로 변환
-            String pmText = "좋음";
-            if (originData.pmIndex > 150) pmText = "매우 나쁨";
-            else if (originData.pmIndex > 80) pmText = "나쁨";
-            else if (originData.pmIndex > 30) pmText = "보통";
+            String pmText = (originData.pmIndex > 150) ? "매우 나쁨" : (originData.pmIndex > 80) ? "나쁨" : (originData.pmIndex > 30) ? "보통" : "좋음";
+            String weatherStr = String.format("🌡 %.1f℃ | 😷 미세먼지: %s | ☔ 강수량: %.1fmm", originData.temp, pmText, originData.rain);
+            String indoorText = (originData.indoorTag >= 1.0f) ? "실내" : (originData.indoorTag == 0.5f) ? "실내외 복합" : "야외";
 
-            // 2. 날씨 정보 한 줄로 묶기
-            String weatherStr = String.format("🌡 %.1f℃ | 😷 미세먼지: %s | ☔ 강수량: %.1fmm",
-                    originData.temp, pmText, originData.rain);
-
-            // 3. 실내외 태그를 글자로 변환 (JSON 메타데이터 기준)
-            float indoorValue = originData.indoorTag;
-            String indoorText = "야외";
-            if (indoorValue >= 1.0f) indoorText = "실내";
-            else if (indoorValue == 0.5f) indoorText = "실내외 복합";
-
-            // 4. 축제 여부 확인
-            String eventText = (originData.localEvent >= 1.0f)
-                    ? "🎪 축제: 개최중"
-                    : "🎪 축제: 없음";
-
-            // 5. 장소 정보 한 줄로 묶기 (메인 화면용: 짧게)
-            String placeInfoStr = eventText + " | " + indoorText;
-
-            // 6. 진짜 축제 이름 뽑아두기 (상세 화면용: 길게)
+            String eventText = (originData.localEvent >= 1.0f) ? "🎪 축제: 개최중" : "🎪 축제: 없음";
             String realEventName = (originData.localEvent >= 1.0f && originData.eventName != null && !originData.eventName.isEmpty())
                     ? "🎪 " + originData.eventName
                     : "현재 진행중인 축제/행사가 없습니다.";
 
-            // 최종 리스트에 담기 (realEventName 추가!)
-            resultList.add(new HotPlace(
+            String placeInfoStr = eventText + " | " + indoorText;
+            String localImageUrl = "file:///android_asset/place_images/" + originData.placeName + ".jpg";
+
+            // 1. 객체 생성
+            HotPlace hotPlace = new HotPlace(
                     originData.placeName,
                     originData.congestion,
                     weatherStr,
                     placeInfoStr,
-                    realEventName
-            ));
+                    realEventName,
+                    localImageUrl
+            );
+
+            // 👇 2. AI 예측 점수를 100점 만점으로 변환해서 꽂아주기!
+            int score100 = (int) (scoreData.getScore() * 100);
+            hotPlace.setAiScore("✨ 추천 " + score100 + "점");
+
+            // 3. 리스트에 담기
+            resultList.add(hotPlace);
         }
 
         return resultList;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        sliderHandler.postDelayed(sliderRunnable, 3000);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        sliderHandler.removeCallbacks(sliderRunnable);
     }
 
     @Override

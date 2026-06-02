@@ -67,7 +67,7 @@ public class DetailActivity extends AppCompatActivity {
                 Toast.makeText(this, "찜 목록에서 삭제되었습니다.", Toast.LENGTH_SHORT).show();
             } else {
                 // 찜 추가: 5개의 데이터를 모두 담아서 JSON으로 저장
-                HotPlace savedItem = new HotPlace(placeName, congestion, weatherInfo, placeInfo, eventDetail);
+                HotPlace savedItem = new HotPlace(placeName, congestion, weatherInfo, placeInfo, eventDetail, imageUrl);
                 String json = new Gson().toJson(savedItem);
                 editor.putString(placeName, json);
                 isWished = true;

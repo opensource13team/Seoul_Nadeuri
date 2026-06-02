@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,9 +14,8 @@
             android:id="@+id/iv_detail_photo"
             android:layout_width="match_parent"
             android:layout_height="250dp"
-            android:background="#E0E0E0"
-            android:scaleType="centerCrop"
-            android:src="@android:drawable/ic_menu_gallery" />
+            android:background="@color/bg_light_green"
+            android:scaleType="centerCrop" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,6 +23,7 @@
             android:orientation="vertical"
             android:padding="24dp">
 
+            <!-- 제목 & 찜 버튼 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -36,8 +36,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="장소 이름"
-                    android:textColor="#000000"
+                    android:textColor="@color/text_dark"
                     android:textSize="28sp"
                     android:textStyle="bold" />
 
@@ -49,10 +48,11 @@
                     android:src="@android:drawable/btn_star_big_off" />
             </LinearLayout>
 
+            <!-- 혼잡도, 날씨 박스 (옅은 연두색 배경 적용!) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#F5F5F5"
+                android:background="@color/bg_light_green"
                 android:padding="16dp"
                 android:orientation="vertical"
                 android:layout_marginBottom="16dp">
@@ -60,24 +60,23 @@
                     android:id="@+id/tv_detail_congestion"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🟢 여유"
                     android:textSize="22sp"
                     android:textStyle="bold"
-                    android:textColor="#4CAF50" />
+                    android:textColor="@color/point_green_dark" />
                 <TextView
                     android:id="@+id/tv_detail_weather"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="온도 / 미세먼지 / 강수량"
                     android:textSize="16sp"
-                    android:textColor="#333333" />
+                    android:textColor="@color/text_dark" />
             </LinearLayout>
 
+            <!-- 축제 리스트 박스 (옅은 연두색 배경 적용!) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#FFF9C4"
+                android:background="@color/bg_light_green"
                 android:padding="16dp"
                 android:orientation="vertical"
                 android:layout_marginBottom="16dp">
@@ -87,24 +86,24 @@
                     android:text="🎪 진행중인 축제/행사"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:textColor="#FF9800" />
+                    android:textColor="@color/point_green_dark" />
                 <TextView
                     android:id="@+id/tv_detail_event_list"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="축제 리스트가 여기에 쭈르륵 뜹니다."
                     android:textSize="16sp"
-                    android:textColor="#333333" />
+                    android:textColor="@color/text_dark" />
             </LinearLayout>
 
+            <!-- 길찾기 버튼 (네이버 공식 그린 컬러는 유지) -->
             <Button
                 android:id="@+id/btn_naver_map"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:backgroundTint="#03C75A"
                 android:text="📍 네이버 지도로 길찾기"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
         </LinearLayout>
