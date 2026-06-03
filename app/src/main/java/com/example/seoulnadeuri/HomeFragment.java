@@ -85,10 +85,10 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupQuickFilters() {
-        binding.btnFilterIndoor.setOnClickListener(v -> Toast.makeText(getContext(), "실내 핫플 필터 준비중입니다!", Toast.LENGTH_SHORT).show());
-        binding.btnFilterOutdoor.setOnClickListener(v -> Toast.makeText(getContext(), "야외 핫플 필터 준비중입니다!", Toast.LENGTH_SHORT).show());
-        binding.btnFilterRelaxed.setOnClickListener(v -> Toast.makeText(getContext(), "쾌적한 장소 필터 준비중입니다!", Toast.LENGTH_SHORT).show());
-        binding.btnFilterFestival.setOnClickListener(v -> Toast.makeText(getContext(), "축제 정보 필터 준비중입니다!", Toast.LENGTH_SHORT).show());
+        binding.btnFilterIndoor.setOnClickListener(v -> openFilteredSearch(RecordFragment.FILTER_INDOOR));
+        binding.btnFilterOutdoor.setOnClickListener(v -> openFilteredSearch(RecordFragment.FILTER_OUTDOOR));
+        binding.btnFilterRelaxed.setOnClickListener(v -> openFilteredSearch(RecordFragment.FILTER_LOW_CONGESTION));
+        binding.btnFilterFestival.setOnClickListener(v -> openFilteredSearch(RecordFragment.FILTER_FESTIVAL));
 
         // 👇 찜한 장소 버튼 누르면 찜 목록 화면으로 이동!
         binding.btnFilterWishlist.setOnClickListener(v -> {
@@ -97,6 +97,13 @@ public class HomeFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
+    }
+
+    private void openFilteredSearch(String filter) {
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, RecordFragment.newInstance(filter))
+                .addToBackStack(null)
+                .commit();
     }
 
     private void setupAiRecommend() {
