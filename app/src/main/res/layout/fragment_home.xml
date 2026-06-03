@@ -74,14 +74,16 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-                <TextView
+                <ImageView
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:background="@drawable/bg_search_bar"
                     android:backgroundTint="@color/bg_light_green"
+                    android:contentDescription="실내 필터"
                     android:gravity="center"
-                    android:text="🏢"
-                    android:textSize="26sp" />
+                    android:padding="15dp"
+                    android:src="@drawable/ic_filter_indoor"
+                    app:tint="@color/point_green_dark" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -98,14 +100,16 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-                <TextView
+                <ImageView
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:background="@drawable/bg_search_bar"
                     android:backgroundTint="@color/bg_light_green"
+                    android:contentDescription="야외 필터"
                     android:gravity="center"
-                    android:text="🌳"
-                    android:textSize="26sp" />
+                    android:padding="15dp"
+                    android:src="@drawable/ic_filter_outdoor"
+                    app:tint="@color/point_green_dark" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -122,14 +126,16 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-                <TextView
+                <ImageView
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:background="@drawable/bg_search_bar"
                     android:backgroundTint="@color/bg_light_green"
+                    android:contentDescription="쾌적 필터"
                     android:gravity="center"
-                    android:text="🟢"
-                    android:textSize="26sp" />
+                    android:padding="15dp"
+                    android:src="@drawable/ic_filter_relaxed"
+                    app:tint="@color/point_green_dark" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -146,14 +152,16 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-                <TextView
+                <ImageView
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:background="@drawable/bg_search_bar"
                     android:backgroundTint="@color/bg_light_green"
+                    android:contentDescription="축제 필터"
                     android:gravity="center"
-                    android:text="🎪"
-                    android:textSize="26sp" />
+                    android:padding="15dp"
+                    android:src="@drawable/ic_filter_festival"
+                    app:tint="@color/point_green_dark" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -170,14 +178,16 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-                <TextView
+                <ImageView
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:background="@drawable/bg_search_bar"
                     android:backgroundTint="#FFF9C4"
+                    android:contentDescription="찜목록"
                     android:gravity="center"
-                    android:text="⭐"
-                    android:textSize="26sp" />
+                    android:padding="15dp"
+                    android:src="@drawable/ic_filter_wishlist"
+                    app:tint="#F9A825" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
