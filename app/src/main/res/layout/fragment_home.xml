@@ -25,7 +25,7 @@
                 android:layout_height="32dp"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
-                android:src="@mipmap/ic_launcher" /> <!-- 나중에 디자인하신 보따리 로고로 교체! -->
+                android:src="@drawable/app_logo" />
 
             <!-- 좌측: 앱 이름 -->
             <TextView

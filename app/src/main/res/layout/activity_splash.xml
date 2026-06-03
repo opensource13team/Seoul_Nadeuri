@@ -4,14 +4,23 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF">
 
+    <ImageView
+        android:id="@+id/iv_logo"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/app_logo"
+        android:contentDescription="앱 로고" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="서울 나들이\n로고"
-        android:textAlignment="center"
-        android:textColor="#000000"
-        android:textSize="32sp"
+        android:layout_below="@id/iv_logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:text="서울 나래"
+        android:textColor="#333333"
+        android:textSize="24sp"
         android:textStyle="bold" />
 
 </RelativeLayout>
