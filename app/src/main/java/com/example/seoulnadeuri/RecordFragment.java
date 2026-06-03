@@ -28,6 +28,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RecordFragment extends Fragment {
 
+    public static final String FILTER_FESTIVAL = "festival";
+    public static final String FILTER_LOW_CONGESTION = "low_congestion";
+    public static final String FILTER_INDOOR = "indoor";
+    public static final String FILTER_OUTDOOR = "outdoor";
+    private static final String ARG_INITIAL_FILTER = "initial_filter";
+
     private FragmentRecordBinding binding;
     private final List<SeoulPlaceData> fullRawList = new ArrayList<>();
     private final Map<String, Float> indoorByPlace = new HashMap<>();
@@ -38,6 +44,14 @@ public class RecordFragment extends Fragment {
     private boolean filterLowCongestion;
     private boolean filterIndoor;
     private boolean filterOutdoor;
+
+    public static RecordFragment newInstance(String initialFilter) {
+        RecordFragment fragment = new RecordFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_INITIAL_FILTER, initialFilter);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Nullable
     @Override
@@ -51,9 +65,10 @@ public class RecordFragment extends Fragment {
 
         loadPlaceMeta();
 
-        fetchDataForSearch();
         setupSearch();
         setupFilterChips();
+        applyInitialFilter();
+        fetchDataForSearch();
 
         return view;
     }
@@ -99,6 +114,21 @@ public class RecordFragment extends Fragment {
         bindFilterChip(binding.chipLowCongestion, checked -> filterLowCongestion = checked);
         bindFilterChip(binding.chipIndoor, checked -> filterIndoor = checked);
         bindFilterChip(binding.chipOutdoor, checked -> filterOutdoor = checked);
+    }
+
+    private void applyInitialFilter() {
+        if (getArguments() == null) return;
+
+        String initialFilter = getArguments().getString(ARG_INITIAL_FILTER, "");
+        if (FILTER_FESTIVAL.equals(initialFilter)) {
+            binding.chipFestival.setChecked(true);
+        } else if (FILTER_LOW_CONGESTION.equals(initialFilter)) {
+            binding.chipLowCongestion.setChecked(true);
+        } else if (FILTER_INDOOR.equals(initialFilter)) {
+            binding.chipIndoor.setChecked(true);
+        } else if (FILTER_OUTDOOR.equals(initialFilter)) {
+            binding.chipOutdoor.setChecked(true);
+        }
     }
 
     private void bindFilterChip(Chip chip, FilterToggle toggle) {
