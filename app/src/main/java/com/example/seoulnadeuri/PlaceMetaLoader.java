@@ -118,4 +118,29 @@ public final class PlaceMetaLoader {
         }
         return null;
     }
+    public static float getTarget20sRatio(android.content.Context context, String placeName) {
+        try {
+            // 주의: "place_meta.json" 부분은 유저님이 assets에 저장하신 실제 파일명으로 맞춰주세요!
+            java.io.InputStream is = context.getAssets().open("place_meta.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            String json = new String(buffer, "UTF-8");
+
+            org.json.JSONArray jsonArray = new org.json.JSONArray(json);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                org.json.JSONObject obj = jsonArray.getJSONObject(i);
+
+                // 내가 누른 장소 이름과 똑같은 데이터를 찾았다면?
+                if (obj.getString("placeName").equals(placeName)) {
+                    // target20sRatio 값을 꺼내서 float으로 반환! (없으면 0.5f 반환)
+                    return obj.has("target20sRatio") ? (float) obj.getDouble("target20sRatio") : 0.5f;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0.5f; // 에러가 나거나 못 찾으면 기본값 0.5f(보통) 반환
+    }
 }

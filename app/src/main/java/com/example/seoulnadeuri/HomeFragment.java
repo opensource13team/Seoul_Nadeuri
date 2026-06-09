@@ -122,8 +122,12 @@ public class HomeFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     List<SeoulPlaceData> apiDataList = response.body();
 
-                    // 유저 취향(임시 0.8)을 넣고 AI 엔진 돌리기
-                    List<HotPlace> resultList = runInference(apiDataList, 0.8f);
+                    // 👇 [알고리즘 연동] 스마트폰에 몰래 저장된 내 취향 점수 불러오기!
+                    android.content.SharedPreferences prefs = getContext().getSharedPreferences("SeoulUserPref", android.content.Context.MODE_PRIVATE);
+                    float mySecretPref = prefs.getFloat("USER_PREF", 0.5f); // 기본값은 중간인 0.5
+
+                    // 불러온 진짜 취향 점수를 AI 엔진에 넣고 리스트 뽑기
+                    List<HotPlace> resultList = runInference(apiDataList, mySecretPref);
 
                     // 완성된 리스트를 어댑터에 꽂아서 화면에 띄우기
                     binding.rvAiRecommend.setAdapter(new HotPlaceAdapter(resultList));
@@ -158,7 +162,7 @@ public class HomeFragment extends Fragment {
             String placeInfoStr = eventText + " | " + indoorText;
             String localImageUrl = "file:///android_asset/place_images/" + originData.placeName + ".jpg";
 
-            // 1. 객체 생성 (기존과 동일)
+            // 1. 객체 생성
             HotPlace hotPlace = new HotPlace(
                     originData.placeName,
                     originData.congestion,
@@ -172,43 +176,28 @@ public class HomeFragment extends Fragment {
             int score100 = (int) (scoreData.getScore() * 100);
             hotPlace.setAiScore("✨ 추천 " + score100 + "점");
 
-            // 👇 3. 보따리 챗봇의 한 줄 추천 이유 (행사 1개만 쏙 뽑아오기 버전!)
+            // 3. 보따리 챗봇의 한 줄 추천 이유
             String reason = "💬 봇따리: ";
-
-            // 축제 이름이 길거나 여러 개일 경우, 쉼표(,)로 쪼개서 랜덤으로 딱 1개만 고릅니다.
             String eventName = "특별한 축제";
             if (originData.eventName != null && !originData.eventName.isEmpty()) {
-                String[] eventArray = originData.eventName.split(","); // 쉼표 기준으로 자르기
-                int randomIdx = (int) (Math.random() * eventArray.length); // 랜덤 번호표 뽑기
-                eventName = "[" + eventArray[randomIdx].trim() + "]"; // 앞뒤 공백 없애고 대괄호 씌우기
+                String[] eventArray = originData.eventName.split(",");
+                int randomIdx = (int) (Math.random() * eventArray.length);
+                eventName = "[" + eventArray[randomIdx].trim() + "]";
             }
 
-            // 1순위: [축제 + 비 + 실내] - 완벽한 실내 방어 나들이
             if (originData.localEvent >= 1.0f && originData.rain > 0 && originData.indoorTag >= 1.0f) {
                 reason += "비가 오지만 실내라서 쾌적해요! 게다가 " + eventName + "도 열리고 있어서 꿀잼 보장!";
-            }
-            // 2순위: [축제 + 맑음 + 야외] - 완벽한 야외 피크닉
-            else if (originData.localEvent >= 1.0f && originData.rain == 0 && originData.pmIndex <= 30 && originData.indoorTag == 0.0f) {
+            } else if (originData.localEvent >= 1.0f && originData.rain == 0 && originData.pmIndex <= 30 && originData.indoorTag == 0.0f) {
                 reason += "날씨도 완벽한데 " + eventName + "까지 열리고 있어요! 당장 야외로 뛰어나가요!";
-            }
-            // 3순위: [그냥 축제] - 날씨 상관없이 행사가 중요할 때
-            else if (originData.localEvent >= 1.0f) {
+            } else if (originData.localEvent >= 1.0f) {
                 reason += "지금 " + eventName + " 진행 중이에요! 핫플 분위기 제대로 느껴보세요!";
-            }
-            // 4순위: [비 + 실내]
-            else if (originData.rain > 0 && originData.indoorTag >= 1.0f) {
+            } else if (originData.rain > 0 && originData.indoorTag >= 1.0f) {
                 reason += "비 오는 날씨를 피해 쾌적하게 놀기 좋은 실내 핫플이에요!";
-            }
-            // 5순위: [맑음 + 야외]
-            else if (originData.rain == 0 && originData.pmIndex <= 30 && originData.indoorTag == 0.0f) {
+            } else if (originData.rain == 0 && originData.pmIndex <= 30 && originData.indoorTag == 0.0f) {
                 reason += "미세먼지 없이 맑은 날씨! 탁 트인 야외에서 힐링하기 최고예요!";
-            }
-            // 6순위: [혼잡도 여유]
-            else if ("여유".equals(originData.congestion)) {
+            } else if ("여유".equals(originData.congestion)) {
                 reason += "지금 사람이 적어서 복잡하지 않고 여유롭게 둘러볼 수 있어요.";
-            }
-            // 7순위: [기본 멘트]
-            else {
+            } else {
                 reason += "실시간 데이터를 종합해 본 결과, 지금 당장 떠나기 가장 좋은 곳이에요!";
             }
 

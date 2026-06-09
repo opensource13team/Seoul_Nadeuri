@@ -32,14 +32,15 @@ public class DetailActivity extends AppCompatActivity {
         String weatherInfo = intent.getStringExtra("WEATHER_INFO");
         String placeInfo = intent.getStringExtra("PLACE_INFO");
         String eventDetail = intent.getStringExtra("EVENT_DETAIL"); // 진짜 축제 이름
+        float target20sRatio = PlaceMetaLoader.getTarget20sRatio(this, placeName);
 
         // 2. 화면에 글자 박아넣기
         binding.tvDetailTitle.setText(placeName);
         binding.tvDetailCongestion.setText(congestion);
         binding.tvDetailWeather.setText(weatherInfo);
 
-        // 👇 쉼표+띄어쓰기(", ") 기준으로만 깔끔하게 줄바꿈 처리!
-        String formattedEvent = eventDetail.replace(", ", "\n");
+        // 쉼표+띄어쓰기(", ") 기준으로만 깔끔하게 줄바꿈 처리! (null 체크 추가)
+        String formattedEvent = eventDetail != null ? eventDetail.replace(", ", "\n") : "";
 
         // 노란 박스에 띄우기
         binding.tvDetailEventList.setText(formattedEvent.trim());
@@ -77,8 +78,33 @@ public class DetailActivity extends AppCompatActivity {
             updateWishlistIcon(); // 별 아이콘 색깔 바꾸기
         });
 
-        // 4. 네이버 지도 연동 버튼 클릭 이벤트
+        // 4. 네이버 지도 연동 버튼 클릭 이벤트 (+ 🕵️‍♂️ 갓-데이터 기반 취향 수집 알고리즘!)
         binding.btnNaverMap.setOnClickListener(v -> {
+
+            // --- [AI 취향 업데이트 로직 시작 (데이터 기반!)] ---
+            SharedPreferences userPrefs = getSharedPreferences("SeoulUserPref", MODE_PRIVATE);
+            float currentPref = userPrefs.getFloat("USER_PREF", 0.5f);
+
+            // 🔥 20대 인구 비율 판독기 (0.0 ~ 1.0 기준!)
+            if (target20sRatio >= 0.8f) { // 👈 25.0f 에서 0.8f 로 수정!
+                currentPref += 0.01f; // 핫플 선호
+                android.util.Log.d("USER_PREF_TEST", "20대 비율(" + target20sRatio + ") 높음 -> 핫플 선호! (+0.05)");
+            } else if (target20sRatio <= 0.3f) { // 👈 15.0f 에서 0.3f 로 수정!
+                currentPref -= 0.01f; // 힐링 선호
+                android.util.Log.d("USER_PREF_TEST", "20대 비율(" + target20sRatio + ") 낮음 -> 힐링 선호! (-0.05)");
+            } else {
+                android.util.Log.d("USER_PREF_TEST", "20대 비율(" + target20sRatio + ") 보통 -> 점수 변동 없음");
+            }
+
+            // 점수가 0.0 ~ 1.0 범위를 벗어나지 않게 가두기
+            currentPref = Math.max(0.0f, Math.min(1.0f, currentPref));
+
+            // 변경된 취향 점수를 스마트폰에 몰래 저장 🤫
+            userPrefs.edit().putFloat("USER_PREF", currentPref).apply();
+
+            android.util.Log.d("USER_PREF_TEST", "최종 업데이트된 취향 점수: " + currentPref);
+            // --- [AI 취향 업데이트 로직 끝] ---
+
             // URL 스킴을 이용해 네이버 지도 앱으로 바로 목적지 쏘기
             String url = "nmap://search?query=" + placeName + "&appname=com.example.seoulnadeuri";
             Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));

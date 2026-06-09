@@ -35,9 +35,11 @@ public class HotPlace {
     public String getPlaceInfo() { return placeInfo; }
     public String getEventDetail() { return eventDetail; }
     public String getImageUrl() { return imageUrl; }
+
     private String aiScore = "";
     public void setAiScore(String aiScore) { this.aiScore = aiScore; }
     public String getAiScore() { return aiScore; }
+
     private String recommendReason = "";
     public String getRecommendReason() { return recommendReason; }
     public void setRecommendReason(String recommendReason) { this.recommendReason = recommendReason; }
