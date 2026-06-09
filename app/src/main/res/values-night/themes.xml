@@ -3,5 +3,8 @@
     <style name="Base.Theme.SeoulNadeuri" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+
+        <!-- 👇 다크모드에서도 프리텐다드 폰트 완벽 적용! -->
+        <item name="android:fontFamily">@font/pretendard</item>
     </style>
 </resources>

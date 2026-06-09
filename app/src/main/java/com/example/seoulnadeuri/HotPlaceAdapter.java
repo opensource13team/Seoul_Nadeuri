@@ -32,6 +32,13 @@ public class HotPlaceAdapter extends RecyclerView.Adapter<HotPlaceAdapter.ViewHo
         holder.tvWeather.setText(item.getWeatherInfo());
         holder.tvPlaceInfo.setText(item.getPlaceInfo());
 
+        if (item.getRecommendReason() != null && !item.getRecommendReason().isEmpty()) {
+            holder.tvRecommendReason.setVisibility(View.VISIBLE);
+            holder.tvRecommendReason.setText(item.getRecommendReason());
+        } else {
+            holder.tvRecommendReason.setVisibility(View.GONE);
+        }
+
         // 👇 AI 점수가 들어있으면 보여주고, 아니면 숨김 처리!
         if (item.getAiScore() != null && !item.getAiScore().isEmpty()) {
             holder.tvAiScore.setVisibility(View.VISIBLE);
@@ -65,8 +72,10 @@ public class HotPlaceAdapter extends RecyclerView.Adapter<HotPlaceAdapter.ViewHo
         this.placeList = newList;
         notifyDataSetChanged(); // "데이터 바뀌었으니 화면 다시 싹 그려라!" 하고 새로고침하는 핵심 명령어
     }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvPlaceName, tvCongestion, tvWeather, tvPlaceInfo, tvAiScore;
+        // 👇 바로 이 부분입니다! 맨 끝에 tvRecommendReason를 추가했습니다.
+        TextView tvPlaceName, tvCongestion, tvWeather, tvPlaceInfo, tvAiScore, tvRecommendReason;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -74,7 +83,8 @@ public class HotPlaceAdapter extends RecyclerView.Adapter<HotPlaceAdapter.ViewHo
             tvCongestion = itemView.findViewById(R.id.tv_congestion);
             tvWeather = itemView.findViewById(R.id.tv_weather_info);
             tvPlaceInfo = itemView.findViewById(R.id.tv_place_info);
-            tvAiScore = itemView.findViewById(R.id.tv_ai_score); // 요기 추가!
+            tvAiScore = itemView.findViewById(R.id.tv_ai_score);
+            tvRecommendReason = itemView.findViewById(R.id.tv_recommend_reason);
         }
     }
 }

@@ -3,6 +3,9 @@
     <style name="Base.Theme.SeoulNadeuri" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        <!-- 👇 이 한 줄을 추가하면 앱 전체 글씨체가 프리텐다드로 싹 바뀝니다! -->
+        <item name="android:fontFamily">@font/pretendard</item>
     </style>
 
     <style name="Theme.SeoulNadeuri" parent="Base.Theme.SeoulNadeuri" />

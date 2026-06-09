@@ -73,5 +73,18 @@
             android:textColor="#888888"
             android:textSize="13sp" />
 
+        <TextView
+            android:id="@+id/tv_recommend_reason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="#F5F8FF"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="10dp"
+            android:text="💬 봇따리: 맑고 여유로워서 나들이 가기 딱 좋아요!"
+            android:textColor="#1976D2"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>
